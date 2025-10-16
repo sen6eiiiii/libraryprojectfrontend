@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -7,10 +7,14 @@
 
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css">
-  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="/assets/style.css">
 
+  <!-- Vue 3 -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+  <!-- External CSS -->
+  <link rel="stylesheet" href="/assets/style.css">
 </head>
+
 <body>
   <div id="app">
     <header>
@@ -42,15 +46,15 @@
         </select>
       </div>
 
+      <!-- Products -->
       <div v-if="showProduct">
-        <figure v-for="product in sortedProducts">
-          <img v-bind:src="product.image" :alt="product.title" :class="{'rabbit-image': product.id === 1001}">
+        <figure v-for="product in sortedProducts" :key="product.id">
+          <img :src="product.image" :alt="product.title" :class="{'rabbit-image': product.id === 1001}">
           <h1 v-text="product.title" class="title"></h1>
           <p v-text="product.description"></p>
           <p>Price: {{ product.price }}</p>
           <p>Spaces Available: {{ product.availableInventory }}</p>
 
-          <!-- Add to Cart Button -->
           <button v-on:click="addItemToTheCart(product.id)" v-if="canAddToTheCart(product.id)">
             <i class="fa-solid fa-cart-plus"></i> Add to Cart
           </button>
@@ -58,7 +62,6 @@
             <i class="fa-solid fa-ban"></i> Add to Cart
           </button>
 
-          <!-- Remove from Cart Button -->
           <button v-on:click="removeItemFromCart(product.id)" :disabled="!canRemoveFromCart(product.id)">
             <i class="fa-solid fa-trash-can"></i> Remove from Cart
           </button>
@@ -68,7 +71,7 @@
           </div>
         </figure>
       </div>
-      
+
       <!-- Checkout Page -->
       <div v-else>
         <h1>Checkout</h1>
@@ -76,7 +79,7 @@
         <!-- Cart Items -->
         <div v-if="cart.length > 0">
           <h2>Your Cart Items:</h2>
-          <div v-for="item in cartItems">
+          <div v-for="item in cartItems" :key="item.id">
             <h3>{{ item.title }}</h3>
             <p>Price: {{ item.price }}</p>
             <p>Quantity: {{ item.quantity }}</p>
@@ -91,18 +94,16 @@
             <p>Total Items: {{ totalItems }}</p>
             <p>Total Price: {{ totalPrice }}</p>
           </div>
-          
-          <!-- Checkout Form -->
-          <div class="checkout-form">
-            <h2>Customer Information</h2>
-            <input type="text" v-model="customerName" placeholder="Your Name">
-            <input type="email" v-model="customerEmail" placeholder="Your Email">
-            <input type="text" v-model="customerAddress" placeholder="Your Address">
-            
-            <button v-on:click="submitOrder" :disabled="!canSubmitOrder">
-              <i class="fa-solid fa-credit-card"></i> Submit Order
-            </button>
-          </div>
+
+          <!-- Checkout Form Component -->
+          <checkout-form
+            v-if="!orderSubmitted"
+            :can-submit="canSubmitOrder"
+            v-model:name="customerName"
+            v-model:email="customerEmail"
+            v-model:address="customerAddress"
+            @submit="submitOrder"
+          ></checkout-form>
 
           <!-- Order Receipt -->
           <div v-if="orderSubmitted" class="receipt">
@@ -111,7 +112,7 @@
             <p><strong>Email:</strong> {{ customerEmail }}</p>
             <p><strong>Address:</strong> {{ customerAddress }}</p>
             <h3>Items Purchased:</h3>
-            <div v-for="item in cartItems">
+            <div v-for="item in cartItems" :key="item.id">
               <p>{{ item.quantity }} x {{ item.title }} - {{ item.price * item.quantity }}</p>
             </div>
             <h3>Total Cost: {{ totalPrice }}</h3>
@@ -119,12 +120,12 @@
           </div>
         </div>
         
-        <!-- Empty Cart Message -->
+        <!-- Empty Cart -->
         <div v-else>
           <h2>Your cart is empty</h2>
           <p>Add some products to your cart first!</p>
         </div>
-        
+
         <button @click="goBack">
           <i class="fa-solid fa-arrow-left"></i> Go Back to Products
         </button>
@@ -132,219 +133,135 @@
     </main>
   </div>
 
-<script>
-var { createApp } = Vue;
-window.app = createApp({
-  data() {
-    return {
-      myVarable: "ok",
-      sitename: "This is my wonderful app",
-      showProduct: true,
-      sortBy: 'subject',
-      sortOrder: 'asc',
-      customerName: '',
-      customerEmail: '',
-      customerAddress: '',
-      orderSubmitted: false,
-     product1: {
-  id: 1001,
-  title: "Rabbit food 25lb bag",
-  subject: "Pet Food",
-  description: "A 25 pound bag of irresistible organic goodness for your rabbit.",
-  price: 2000,
-  image: "../assets/images/rabbit.png",
-  location: "Luton",
-  availableInventory: 10
-},
-product2: {
-  id: 1002,
-  title: "Scorpion",
-  subject: "Live Animals",
-  description: "Can be used as food or as a pet.",
-  price: 3500,
-  image: "../assets/images/scorpion.png",
-  location: "London",
-  availableInventory: 10
-},
-product3: {
-  id: 1003,
-  title: "Snake",
-  subject: "Live Animals",
-  description: "A calm and slithery companion.",
-  price: 5000,
-  image: "../assets/images/snake.png",
-  location: "Hendon",
-  availableInventory: 10
-},
-product4: {
-  id: 1004,
-  title: "Hamster Cage",
-  subject: "Pet Accessories",
-  description: "Spacious cage with exercise wheel and tunnels.",
-  price: 4500,
-  image: "../assets/images/hamster.png",
-  location: "Manchester",
-  availableInventory: 8
-},
-product5: {
-  id: 1005,
-  title: "Bird Seed Mix",
-  subject: "Pet Food",
-  description: "Premium seed mix for all types of birds.",
-  price: 1500,
-  image: "../assets/images/pappagallo.png",
-  location: "Birmingham",
-  availableInventory: 15
-},
-product6: {
-  id: 1006,
-  title: "Fish Tank",
-  subject: "Pet Accessories",
-  description: "20-gallon aquarium with filter and lighting.",
-  price: 7500,
-  image: "../assets/images/fishtank.png",
-  location: "Leeds",
-  availableInventory: 5
-},
-product7: {
-  id: 1007,
-  title: "Guinea Pig",
-  subject: "Live Animals",
-  description: "Friendly and social small pet.",
-  price: 2500,
-  image: "../assets/images/hamster.png",
-  location: "Liverpool",
-  availableInventory: 12
-},
-product8: {
-  id: 1008,
-  title: "Cat Litter",
-  subject: "Pet Supplies",
-  description: "Clumping litter with odor control.",
-  price: 1800,
-  image: "../assets/images/cat.png",
-  location: "Glasgow",
-  availableInventory: 20
-},
-product9: {
-  id: 1009,
-  title: "Dog Leash",
-  subject: "Pet Accessories",
-  description: "Durable 6-foot leash with comfortable handle.",
-  price: 1200,
-  image: "../assets/images/dog.png",
-  location: "Edinburgh",
-  availableInventory: 25
-},
-product10: {
-  id: 1010,
-  title: "Turtle Food",
-  subject: "Pet Food",
-  description: "Nutritional pellets for aquatic and land turtles.",
-  price: 2200,
-  image: "../assets/images/turtle.png",
-  location: "Cardiff",
-  availableInventory: 18
-},
+  <script>
+  const { createApp, ref } = Vue;
 
-      cart: []
-    }
-  },
-  methods: {
-    showCheckout() {
-      this.showProduct = !this.showProduct;
-      this.orderSubmitted = false;
+  // ✅ Checkout Form Component
+  const CheckoutForm = {
+    template: `
+      <div class="checkout-form">
+        <h2>Customer Information</h2>
+        <input type="text" v-model="localName" placeholder="Your Name">
+        <input type="email" v-model="localEmail" placeholder="Your Email">
+        <input type="text" v-model="localAddress" placeholder="Your Address">
+        
+        <button @click="handleSubmit" :disabled="!canSubmit">
+          <i class="fa-solid fa-credit-card"></i> Submit Order
+        </button>
+      </div>
+    `,
+    props: {
+      canSubmit: Boolean,
+      name: String,
+      email: String,
+      address: String
     },
-    addItemToTheCart(productId) {
-      this.cart.push(productId);
-    },
-    removeItemFromCart(productId) {
-      const index = this.cart.indexOf(productId);
-      if (index > -1) {
-        this.cart.splice(index, 1);
-      }
-    },
-    goBack() {
-      this.showProduct = true;
-      this.orderSubmitted = false;
-    },
-    submitOrder() {
-      if (this.canSubmitOrder) {
-        this.orderSubmitted = true;
-      }
-    }
-  },
-  computed: {
-    itemsInTheCart() {
-      return this.cart.length || "";
-    },
-    canAddToTheCart() {
-      return (productId) => {
-        const product = [this.product1, this.product2, this.product3, this.product4, this.product5, 
-                        this.product6, this.product7, this.product8, this.product9, this.product10]
-                        .find(p => p.id === productId);
-        if (!product) return false;
-        const countInCart = this.cart.filter(id => id === productId).length;
-        return product.availableInventory > countInCart;
+    emits: ['submit', 'update:name', 'update:email', 'update:address'],
+    data() {
+      return {
+        localName: this.name,
+        localEmail: this.email,
+        localAddress: this.address
       };
     },
-    canRemoveFromCart() {
-      return (productId) => this.cart.includes(productId);
+    watch: {
+      localName(value) { this.$emit('update:name', value); },
+      localEmail(value) { this.$emit('update:email', value); },
+      localAddress(value) { this.$emit('update:address', value); }
     },
-    sortedProducts() {
-      const products = [this.product1, this.product2, this.product3, this.product4, this.product5, 
-                       this.product6, this.product7, this.product8, this.product9, this.product10];
-      
-      return products.sort((a, b) => {
-        let aValue, bValue;
-        switch(this.sortBy) {
-          case 'subject': aValue = a.subject; bValue = b.subject; break;
-          case 'location': aValue = a.location; bValue = b.location; break;
-          case 'price': aValue = a.price; bValue = b.price; break;
-          case 'spaces': aValue = a.availableInventory; bValue = b.availableInventory; break;
-          default: aValue = a.subject; bValue = b.subject;
-        }
-        if (typeof aValue === 'string') {
-          aValue = aValue.toLowerCase();
-          bValue = bValue.toLowerCase();
-        }
-        return this.sortOrder === 'asc'
-          ? aValue < bValue ? -1 : aValue > bValue ? 1 : 0
-          : aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
-      });
-    },
-    cartItems() {
-      const itemCounts = {};
-      this.cart.forEach(id => {
-        itemCounts[id] = (itemCounts[id] || 0) + 1;
-      });
-      
-      return Object.keys(itemCounts).map(id => {
-        const product = [this.product1, this.product2, this.product3, this.product4, this.product5, 
-                        this.product6, this.product7, this.product8, this.product9, this.product10]
-                        .find(p => p.id === parseInt(id));
-        return {
-          ...product,
-          quantity: itemCounts[id]
-        };
-      });
-    },
-    totalItems() {
-      return this.cart.length;
-    },
-    totalPrice() {
-      return this.cartItems.reduce((total, item) => {
-        return total + (item.price * item.quantity);
-      }, 0);
-    },
-    canSubmitOrder() {
-      return this.cart.length > 0 && 
-             this.customerName && 
-             this.customerEmail && 
-             this.customerAddress;
+    methods: {
+      handleSubmit() {
+        if (this.canSubmit) this.$emit('submit');
+      }
     }
-  }
-}).mount('#app');
-</script>
+  };
+
+  // ✅ Main App
+  createApp({
+    components: { CheckoutForm },
+    data() {
+      return {
+        sitename: "This is my wonderful app",
+        showProduct: true,
+        sortBy: 'subject',
+        sortOrder: 'asc',
+        customerName: '',
+        customerEmail: '',
+        customerAddress: '',
+        orderSubmitted: false,
+        cart: [],
+        products: [
+          { id: 1001, title: "Rabbit food 25lb bag", subject: "Pet Food", description: "A 25 pound bag of irresistible organic goodness for your rabbit.", price: 2000, image: "../assets/images/rabbit.png", location: "Luton", availableInventory: 10 },
+          { id: 1002, title: "Scorpion", subject: "Live Animals", description: "Can be used as food or as a pet.", price: 3500, image: "../assets/images/scorpion.png", location: "London", availableInventory: 10 },
+          { id: 1003, title: "Snake", subject: "Live Animals", description: "A calm and slithery companion.", price: 5000, image: "../assets/images/snake.png", location: "Hendon", availableInventory: 10 },
+          { id: 1004, title: "Hamster Cage", subject: "Pet Accessories", description: "Spacious cage with exercise wheel and tunnels.", price: 4500, image: "../assets/images/hamster.png", location: "Manchester", availableInventory: 8 },
+          { id: 1005, title: "Bird Seed Mix", subject: "Pet Food", description: "Premium seed mix for all types of birds.", price: 1500, image: "../assets/images/pappagallo.png", location: "Birmingham", availableInventory: 15 },
+          { id: 1006, title: "Fish Tank", subject: "Pet Accessories", description: "20-gallon aquarium with filter and lighting.", price: 7500, image: "../assets/images/fishtank.png", location: "Leeds", availableInventory: 5 },
+          { id: 1007, title: "Guinea Pig", subject: "Live Animals", description: "Friendly and social small pet.", price: 2500, image: "../assets/images/hamster.png", location: "Liverpool", availableInventory: 12 },
+          { id: 1008, title: "Cat Litter", subject: "Pet Supplies", description: "Clumping litter with odor control.", price: 1800, image: "../assets/images/cat.png", location: "Glasgow", availableInventory: 20 },
+          { id: 1009, title: "Dog Leash", subject: "Pet Accessories", description: "Durable 6-foot leash with comfortable handle.", price: 1200, image: "../assets/images/dog.png", location: "Edinburgh", availableInventory: 25 },
+          { id: 1010, title: "Turtle Food", subject: "Pet Food", description: "Nutritional pellets for aquatic and land turtles.", price: 2200, image: "../assets/images/turtle.png", location: "Cardiff", availableInventory: 18 },
+        ]
+      };
+    },
+    computed: {
+      itemsInTheCart() {
+        return this.cart.length || "";
+      },
+      sortedProducts() {
+        return [...this.products].sort((a, b) => {
+          let aVal = a[this.sortBy], bVal = b[this.sortBy];
+          if (typeof aVal === 'string') { aVal = aVal.toLowerCase(); bVal = bVal.toLowerCase(); }
+          return this.sortOrder === 'asc' ? aVal > bVal ? 1 : -1 : aVal < bVal ? 1 : -1;
+        });
+      },
+      cartItems() {
+        const counts = {};
+        this.cart.forEach(id => counts[id] = (counts[id] || 0) + 1);
+        return Object.keys(counts).map(id => {
+          const p = this.products.find(p => p.id === parseInt(id));
+          return { ...p, quantity: counts[id] };
+        });
+      },
+      totalItems() {
+        return this.cart.length;
+      },
+      totalPrice() {
+        return this.cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+      },
+      canSubmitOrder() {
+        return this.cart.length > 0 && this.customerName && this.customerEmail && this.customerAddress;
+      }
+    },
+    methods: {
+      showCheckout() {
+        this.showProduct = !this.showProduct;
+        this.orderSubmitted = false;
+      },
+      addItemToTheCart(id) {
+        this.cart.push(id);
+      },
+      removeItemFromCart(id) {
+        const i = this.cart.indexOf(id);
+        if (i > -1) this.cart.splice(i, 1);
+      },
+      goBack() {
+        this.showProduct = true;
+        this.orderSubmitted = false;
+      },
+      submitOrder() {
+        if (this.canSubmitOrder) this.orderSubmitted = true;
+      },
+      canAddToTheCart(productId) {
+        const p = this.products.find(p => p.id === productId);
+        const count = this.cart.filter(id => id === productId).length;
+        return p && count < p.availableInventory;
+      },
+      canRemoveFromCart(productId) {
+        return this.cart.includes(productId);
+      }
+    }
+  }).mount('#app');
+  </script>
 </body>
 </html>
