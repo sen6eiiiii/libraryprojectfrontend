@@ -67,40 +67,7 @@
         </select>
       </div>
 
-      <!-- Search Info -->
-      <div v-if="showLessons && searchQuery" class="search-info">
-        <p>Showing {{ filteredLessons.length }} results for "{{ searchQuery }}"</p>
-      </div>
-
-      <!-- Lessons -->
-      <div v-if="showLessons">
-        <figure v-for="lesson in sortedAndFilteredLessons" :key="lesson.id">
-          <img :src="lesson.image" :alt="lesson.subject" />
-          <h1>{{ lesson.subject }}</h1>
-          <p><strong>Location:</strong> {{ lesson.location }}</p>
-          <p><strong>Price:</strong> £{{ lesson.price }}</p>
-          <p><strong>Spaces Available:</strong> {{ lesson.spaces }}</p>
-
-          <button v-if="canAddToCart(lesson.id)" @click="addItemToCart(lesson.id)">
-            <i class="fa-solid fa-cart-plus"></i> Add to Cart
-          </button>
-          <button v-else disabled>
-            <i class="fa-solid fa-ban"></i> Add to Cart
-          </button>
-
-          <button
-            @click="removeItemFromCart(lesson.id)"
-            :disabled="!canRemoveFromCart(lesson.id)"
-          >
-            <i class="fa-solid fa-trash-can"></i> Remove from Cart
-          </button>
-
-          <div v-if="!canAddToCart(lesson.id) && cart.length > 0">
-            No more spaces available for this lesson
-          </div>
-        </figure>
-      </div>
-
+   
       <!-- Checkout Page -->
       <div v-else>
         <h1>Checkout</h1>
