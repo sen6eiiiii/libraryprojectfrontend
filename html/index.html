@@ -159,27 +159,7 @@
       </div>
     </main>
   </div>
-<script>
-  var app = Vue.createApp({
-    components: { 
-      CheckoutForm: {
-        template: `
-          <div class="checkout-form">
-            <h2>Student Information</h2>
-            <input 
-              type="text" 
-              v-model.trim="localName" 
-              placeholder="Your Name (e.g. John Doe)"
-            >
-            <input 
-              type="text" 
-              v-model.trim="localPhone" 
-              placeholder="Your Phone Number (e.g. +44 7123 456789)"
-            >
-            <button @click="handleSubmit" :disabled="!canSubmit">
-              <i class="fa-solid fa-credit-card"></i> Submit Order
-            </button>
-          </div>
+
         `,
         props: {
           canSubmit: Boolean,
