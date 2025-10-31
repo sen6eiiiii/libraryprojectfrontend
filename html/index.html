@@ -105,7 +105,17 @@
       <div v-else>
         <h1>Checkout</h1>
 
-       
+        <!-- Cart Items -->
+        <div v-if="cart.length > 0">
+          <h2>Your Selected Lessons:</h2>
+          <div v-for="item in cartItems" :key="item.id">
+            <h3>{{ item.subject }}</h3>
+            <p>Price: £{{ item.price }}</p>
+            <p>Quantity: {{ item.quantity }}</p>
+            <button @click="removeItemFromCart(item.id)">
+              <i class="fa-solid fa-trash-can"></i> Remove
+            </button>
+          </div>
 
           <!-- Order Summary -->
           <div class="order-summary">
